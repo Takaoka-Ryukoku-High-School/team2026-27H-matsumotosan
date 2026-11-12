@@ -22,6 +22,10 @@ EXPENSE_CATEGORIES = ["食費", "日用品", "交通費", "住居費", "光熱�
 INCOME_CATEGORIES = ["給与", "賞与", "副収入", "臨時収入", "その他"]
 
 
+def is_positive_int(value):
+    return type(value) is int and value > 0
+
+
 def load_transactions():
     try:
         transactions = json.loads(DATA_FILE.read_text(encoding="utf-8"))
@@ -39,7 +43,7 @@ def load_transactions():
             continue
         if item["type"] not in ("income", "expense"):
             continue
-        if not isinstance(item.get("amount"), int) or item["amount"] <= 0:
+        if not is_positive_int(item.get("amount")):
             continue
         try:
             date.fromisoformat(item["date"])
@@ -50,6 +54,7 @@ def load_transactions():
 
 
 def save_transactions(transactions):
+    DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
     DATA_FILE.write_text(json.dumps(transactions, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
@@ -66,12 +71,12 @@ def load_budgets():
         if isinstance(month, str)
         and len(month) == 7
         and month[4] == "-"
-        and isinstance(amount, int)
-        and amount > 0
+        and is_positive_int(amount)
     }
 
 
 def save_budgets(budgets):
+    BUDGET_FILE.parent.mkdir(parents=True, exist_ok=True)
     BUDGET_FILE.write_text(json.dumps(budgets, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
